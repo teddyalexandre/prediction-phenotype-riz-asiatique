@@ -1,7 +1,8 @@
 ---
 title: "Statistical Analysis and Description MRR Project"
-author: "Teddy ALEXANDRE, Arthur BABIN"
-date: "`r Sys.Date()`"
+author: "Teddy ALEXANDRE, Arthur BABIN (Group 9, Bio Project)"
+date: "18 Novembre 2022"
+geometry: "left=1cm,right=1cm,top=0.4cm,bottom=0.4cm"
 output:
   pdf_document: default
   html_document: default
@@ -19,39 +20,33 @@ knitr::opts_chunk$set(echo = TRUE)
 
 Over half of the world's population is fed by the cultivars of *Oryza sativa*, also referred to as Asian rice, which is a form of cultivated rice. Hence, rice production and productivity is essential for guaranteeing food security, alleviating hunger, and setting the stage for long-term economic growth. 
 
-Furthermore O.Sativa is a model organism for the botany of cereals (small size, ease of growth, high fecundity, short generation time, small genome and amenability to genetic manipulation, including crossing, mutagenesis and gene modification) and has a genome that is *easy to genetically manipulate* with 430 Mbp spread across 12 chromosomes that can be sorted into five sub-populations: 
-- Indica
-- Aus
-- Temperate Japonica
-- Tropical Japonica
-- Aromatic
+Furthermore O.Sativa is a model organism for the botany of cereals (small size, ease of growth, high fecundity, short generation time, small genome and amenability to genetic manipulation, including crossing, mutagenesis and gene modification) and has a genome that is *easy to genetically manipulate*, with 430 Mbp spread across 12 chromosomes that can be sorted into five sub-populations: Indica, Aus, Temperate Japonica, Tropical Japonica and Aromatic.
 
 The goal is to understand the genetic basis of various physiological, developmental, and morphological traits in order to lay the groundwork for improving rice yield, quality, and sustainability.
 
 
-## genotype dataset:
+## Genotype dataset :
 ```{r, echo=FALSE}
-load(file="~/Téléchargements/project_park.RData")
+load(file="/home/talexandre/Bureau/S3 MRR/Projet/projet-mrr-2022-bio/Ressources/project_park.RData")
 #head(geno.df)
 ```
+* Rows (number of 36901) : each row corresponds to a SNP (Single-Nucleotide Polymorphism)
+* Columns (number of 413+marker+chrom+pos so 416): marker allele data  : value of each accession for the corresponding SNP : 0=homozygous (major+major), 1=heterozygous (major+minor), 2=homozygous (minor+minor) and NA (represents missing data)
+  + marker: SNP identifier
+  + chrom: chromosome where the SNP is located on
+  + pos: position of the SNP in the ADN sequence of the associated chromosome
 
-lignes (36901) : chaque ligne correspond à un SNP
-colonnes (413+marker+chrom+pos): marker allele data valeur de chaque accession pour le SNP correspondant 0=homozygous (major+major), 1=heterozygous (major+minor), 2=homozygous (minor+minor), NA (represents missing data)
-- marker: identifiant du SNP (aussi appelé marqueur)
-- chrom: chromosome sur lequel se situe le SNP
-- pos: position du SNP dans la séquence ADN du chromosome associé
-
-## phenotype dataset
+## Phenotype dataset :
 
 ```{r, echo=FALSE}
 #head(pheno.df)
 ```
+* Rows (number of 413) : an observation corresponds to an accession
+* Columns (number of 38) : corresponds to the traits used to describe the accession (means are calculated to represent the accession in the data set, from the differents plants of the accession)
 
-lignes (413) : 1 observation correspondant à une accession
-colonnes (38) : correspond aux "traits" ie les caractères utilisés pour décrire l'accession (des moyennes sont calculées pour représenter l'accession dans le dataset à partir des différentes plantes de l'accession)
-- "HybID": numéro d'accession (identifiant unique de l'accession)
-- "NSFTVID": identifiant local de l'accession (va de 1 à 413)
-- "Flowering.time.at.Arkansas", "Flowering.time.at.Faridpur", "Flowering.time.at.Aberdeen", "Year07Flowering.time.at.Arkansas", "Year06Flowering.time.at.Arkansas": flowering time of the plant in days
+- "HybID": accession number (unique identifier of the accession)
+- "NSFTVID": local identifier of the accession (from 1 to 413)
+- "Flowering.time.at.Arkansas", "Flowering.time.at.Faridpur", "Flowering.time.at.Aberdeen", "Year\*Flowering.time.at.\*": flowering time of the plant in days
 - "FT.ratio.of.Arkansas.Aberdeen", "FT.ratio.of.Faridpur.Aberdeen": flowering time ratio
 
 ### Plant Morphology attributes 
@@ -85,18 +80,19 @@ colonnes (38) : correspond aux "traits" ie les caractères utilisés pour décri
 - "Pericarp.color": descriptor of the color of the pericarp (1 or 0)
 
 ### Stress tolerance attributes
-- "Straighthead.suseptability": rice susceptibility to straighthead (disease) from 1 (no symptoms) to 9 (severe damages with plants not heading)
+- "Straighthead.susceptability": rice susceptibility to straighthead (disease) from 1 (no symptoms) to 9 (severe damages with plants not heading)
 - "Blast.resistance": rice resistance to foliar blast (disease) from 0 (Highly resistant) to 9 (Very susceptible)
 
 ### Quality-related attributes
 - "Amylose.content": Amylose content in percentage
-- "Alkali.spreading.value": Alkali Spreading Value (ASV) related to the gelatinization temperature
+- "Alkali.spreading.value": Alkali Spreading Value (ASV) related to the gelatinization temperature of the seed
 - "Protein.content": Protein content in percentage
 
-Five sub-populations
-- Indica
-- Aus
-- Temperate Japonica
-- Tropical Japonica
-- Aromatic
 
+Concerning our next steps, we chose three target variables to explain and reflect the measure of the quality, durability and yield of rice production. We will focus on *Seed.number.per.penicle*, *Amylose.content* and *Straighthead.susceptability*. The following plots describe the partition between the target variables.
+
+```{r, out.width = "500px", out.height="500px", fig.align='center', echo=FALSE}
+knitr::include_graphics("/home/talexandre/Bureau/S3 MRR/Projet/projet-mrr-2022-bio/Notebook/boxplots.png")
+```
+
+Indeed, we see that for the variable *Seed.number.per.panicle*, the median is located around 4.8, with a bit of outliers on the left, which we do not want. Concerning the *Straighthead.susceptability* distribution, half of the values seem to be contained between 6 and 8, which has to be moved much more to the left, in order to have a much more resistant rice. Indeed, the perfect situation would be to have an indicator of 1. Finally, when looking at the *Amylose.content* variable, the distribution seems to be satisfaying, even with a couple of outliers. The goal will be to maximize the amount of amylose, which will make more rice in volume, so much more yield.
