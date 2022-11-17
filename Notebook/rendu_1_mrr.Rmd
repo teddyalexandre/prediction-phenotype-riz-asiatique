@@ -96,3 +96,5 @@ knitr::include_graphics("/home/talexandre/Bureau/S3 MRR/Projet/projet-mrr-2022-b
 ```
 
 Indeed, we see that for the variable *Seed.number.per.panicle*, the median is located around 4.8, with a bit of outliers on the left, which we do not want. Concerning the *Straighthead.susceptability* distribution, half of the values seem to be contained between 6 and 8, which has to be moved much more to the left, in order to have a much more resistant rice. Indeed, the perfect situation would be to have an indicator of 1. Finally, when looking at the *Amylose.content* variable, the distribution seems to be satisfaying, even with a couple of outliers. The goal will be to maximize the amount of amylose, which will make more rice in volume, so much more yield.
+
+As said, the goal is to increase the durability, quality and yield of _O. Sativa_ production. To achieve this goal, we will have to use statistical methods to identify genomic regions (from the explanatory data) associated with the three presented complex traits (target variables). It is also called *Gene mapping* and it can be used to develop rice varietes. 
