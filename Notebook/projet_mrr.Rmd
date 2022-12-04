@@ -1,0 +1,125 @@
+---
+title: "Projet MRR"
+author: "Teddy ALEXANDRE"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(corrplot)
+library(lars)
+library(MASS)
+library(caret)
+library(ggplot2)
+library(lattice)
+library(tidyverse)
+library(glmnet)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r}
+## load data
+load(file="/home/talexandre/Bureau/MRR/Projet/projet-mrr-2022-bio/Ressources/project_park.RData")
+dim(geno.df)
+dim(pheno.df)
+dim(Xmat)
+```
+
+```{r}
+X = Xmat
+Y = data.matrix(pheno.df$Seed.number.per.panicle)
+
+# Replace NA Values by the mean of each column
+for(i in 1:ncol(X)){
+  X[is.na(X[,i]), i] <- round(mean(X[,i], na.rm = TRUE))
+}
+Y[is.na(Y)] = mean(Y, na.rm=TRUE)
+
+
+# We reduce the size of X
+X = X[,sample(x = 1:36901, size=36901)]
+random_sample = createDataPartition(Y, p = 0.8, list = FALSE)
+X_train = X[random_sample,]
+Y_train = Y[random_sample]
+
+X_test = X[-random_sample,]
+Y_test = Y[-random_sample]
+
+dim(Xmat)
+```
+
+
+```{r}
+#Regular regression
+modreg = lm(Y_train ~., data = as.data.frame(X_train))
+summary(modreg)
+cor = cor(X[1:30,1:30])
+corrplot(cor)
+```
+
+
+
+```{r}
+# Utils
+# Calcule le meilleur lambda issu d'une régression Lasso
+findBestLassoLambda <- function(inputs,outputs) {
+  lambdas <- 10^seq(2, -5, by = -.1)
+  
+  #k-fold cross validation to determine the best lambda
+  reg <- cv.glmnet(inputs, outputs, alpha = 1, lambda = lambdas, 
+                   standardize = TRUE, nfolds = 20,type.measure="mse")
+  plot(reg)
+  plot(reg$glmnet.fit, "lambda")
+  
+  
+  # Best 
+  lambda_best <- reg$lambda.min; #or 1se
+  abline(v=log(lambda_best),col="red")
+  text(log(lambda_best)+0.5 ,20, "log(lambda_best)", srt=0.2, col = "red",pos=4)
+  lambda_best
+}
+
+makePredictionsLasso <- function(model,testInputs,bestLambda) {
+  predictions <- predict(model, s = bestLambda, newx = testInputs);
+  predictions;
+}
+
+# Calcule les métriques importantes : R2, RSE et MAE
+computeMetrics <- function(predictions,testOutputs,modelName) {
+  metrics <- data.frame(
+    Model = modelName,
+    R2 = R2(predictions, testOutputs),
+    RMSE = RMSE(predictions, testOutputs),
+    MAE = MAE(predictions, testOutputs)
+    );
+  colnames(metrics) <- c('Model Name', 'R2','RMSE','MAE')
+  metrics;
+}
+```
+
+
+
+```{r}
+# Régression LASSO (alpha = 1 dans glmnet)
+lassolambda_best <- findBestLassoLambda(X_train,Y_train)
+modlasso <- glmnet(X_train, Y_train, alpha = 1, lambda = lassolambda_best, standardize = TRUE)
+
+predlasso_train <- makePredictionsLasso(modlasso, X_train, lassolambda_best)
+predlasso_test <- makePredictionsLasso(modlasso, X_test, lassolambda_best)
+reslasso_train <- computeMetrics(predlasso_train,Y_train,"Lasso (on train)")
+reslasso_test <- computeMetrics(predlasso_test,Y_test,"Lasso (on test)")
+
+coef(modlasso)
+
+rbind(reslasso_train, reslasso_test)
+```
+
+
+
+
